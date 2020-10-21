@@ -3,21 +3,13 @@
  * Licensed under the MIT License.
  */
 
-const resume = require('../resume.json');
+ const { Botkit, BotkitConversation } = require('botkit');
 
 module.exports = function(controller) {
 
     controller.hears('sample','message,direct_message', async(bot, message) => {
         await bot.reply(message, 'I heard a sample message.');
     });
-
-    let subjects = []
-
-    Object.keys(resume).forEach(function(key) {
-        subjects.push(key)
-    });
-
-    console.log(subjects);
 
     controller.hears('hi','message,direct_message', async(bot, message) => {
         await bot.reply(message, 'Hi you.');
@@ -26,5 +18,4 @@ module.exports = function(controller) {
     controller.on('message,direct_message', async(bot, message) => {
         await bot.reply(message, `Echo: ${ message.text }`);
     });
-
 }
