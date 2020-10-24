@@ -6,9 +6,20 @@
  const resume = require('../resume.json');
  const { Botkit, BotkitConversation } = require('botkit');
 
-function payloadCreator (obj) {
+function payloadCreator (obj, label) {
   let subjects = []
-  if(obj[0] != undefined){
+  // console.log("1===============================================")
+  // console.log(obj)
+  // console.log(label)
+  // console.log(typeof (obj))
+  if(typeof obj === "string"){
+    
+      subjects.push(
+        {
+          title: obj,
+          payload: obj,
+        });
+  } else if(obj[0] != undefined){
     Object.keys(obj[0]).forEach(function(key) {
       subjects.push(
         {
@@ -17,16 +28,7 @@ function payloadCreator (obj) {
         }
         )
       });
-  }else if(typeof obj === "string"){
-    Object.keys(obj).forEach(function(key) {
-      subjects.push(
-        {
-          title: obj,
-          payload: obj,
-        }
-        )
-      });
-  } else {
+  }else {
       Object.keys(obj).forEach(function(key) {
       subjects.push(
         {
@@ -39,57 +41,97 @@ function payloadCreator (obj) {
   return subjects
 }
 
-function quickReply (last, subjects, controller, deep) {
-  controller.hears(Object.keys(subjects), 'message', async (bot, message) => {
-    subjects = subjects[`${message["text"]}`]
-    
-    await bot.reply(message,{
-        text: 'Here are some more quick replies',
-        quick_replies: payloadCreator(subjects)
-    });
-    subjects = subjects[`${message["text"]}`]
-    if (typeof subjects === "string") {
-      last = true;
-    }
-    if ((typeof subjects === "object" || typeof subjects === "array") && last === false && deep < 4) {
-      deep += 1
-      quickReply(last, subjects, controller, deep)
-    }
-  });
-  return {last, subjects, deep}
-}
+// function quickReply (subjects, controller, message) {
+//   if(subjects[`${message['text']}`]){
+//     subjects = subjects[`${message[text]}`]
+//     controller.hears(Object.keys(subjects), 'message', async (bot, message) => {
+//       await bot.reply(message,{
+//           text: `Here are some quick replies for ${message['text']}`,
+//           quick_replies: payloadCreator(resume)
+//       });
+//       next = message["text"]
+//       quickReply (subjects, controller)
+//     });
 
-
-let navi = false
+//   }
+// }
 
 module.exports = function(controller) {
-  
+  // console.log( Array.isArray(resume['skills'][0]['keywords']) )
   if (controller.adapter.name === 'Web Adapter') {
-
+    // console.log(typeof resume["basics"]["name"])
     console.log('Loading sample web features...');
     let subjects = resume
     controller.hears("resume", 'message', async (bot, message) => {
       subjects = resume
       await bot.reply(message,{
           text: 'Here are some quick replies',
-          quick_replies: payloadCreator(resume)
+          quick_replies: payloadCreator(resume, "")
       });
+
       controller.hears(Object.keys(subjects), 'message', async (bot, message) => {
-      subjects = subjects[`${message["text"]}`]
-      await bot.reply(message,{
-          text: `Here are some quick replies for ${message['text']}`,
-          quick_replies: payloadCreator(subjects)
+        subjects = subjects[`${message["text"]}`]
+        if ( subjects[0] != undefined && typeof subjects[0] != 'string' ) {
+          subjects = subjects[0]
+        }
+        await bot.reply(message,{
+            text: `Here are some quick replies for ${message['text']}`,
+            quick_replies: payloadCreator(subjects, `${message["text"]}`)
+        });
+
+        controller.hears(Object.keys(subjects), 'message', async (bot, message) => {
+          subjects = subjects[`${message["text"]}`]
+          
+          if ( (Array.isArray(subjects) && typeof subjects[0] != 'object') || typeof subjects  === 'string'){
+            await bot.reply(message,{
+              text: `${subjects}`
+            });
+          } else {
+            if ( subjects[0] != undefined && typeof subjects[0] != 'string' ) {
+              subjects = subjects[0]
+            }
+            await bot.reply(message,{
+                text: `Here are some quick replies for ${message['text']}`,
+                quick_replies: payloadCreator(subjects, `${message["text"]}`)
+            });
+          }
+
+          controller.hears(Object.keys(subjects), 'message', async (bot, message) => {
+            subjects = subjects[`${message["text"]}`]
+            console.log(subjects)
+            if ( (Array.isArray(subjects) && typeof subjects[0] != 'object') || typeof subjects  === 'string'){
+            await bot.reply(message,{
+              text: `${subjects}`
+            });
+          } else {
+            if ( subjects[0] != undefined && typeof subjects[0] != 'string' ) {
+              subjects = subjects[0]
+            }
+            await bot.reply(message,{
+                text: `Here are some quick replies for ${message['text']}`,
+                quick_replies: payloadCreator(subjects, `${message["text"]}`)
+            });
+          }
+
+            controller.hears(Object.keys(subjects), 'message', async (bot, message) => {
+              subjects = subjects[`${message["text"]}`]
+              if ( (Array.isArray(subjects) && typeof subjects[0] != 'object') || typeof subjects  === 'string'){
+                await bot.reply(message,{
+                  text: `${subjects}`
+                });
+              } else {
+                if ( subjects[0] != undefined && typeof subjects[0] != 'string' ) {
+                  subjects = subjects[0]
+                }
+                await bot.reply(message,{
+                    text: `Here are some quick replies for ${message['text']}`,
+                    quick_replies: payloadCreator(subjects, `${message["text"]}`)
+                });
+              }
+            });
+          });
+        });
       });
-      controller.hears(Object.keys(subjects), 'message', async (bot, message) => {
-      subjects = subjects[`${message["text"]}`]
-      await bot.reply(message,{
-          text: `Here are some quick replies for ${message['text']}`,
-          quick_replies: payloadCreator(subjects)
-      });
-      
-    });
-      
-    });
     });
 
     // controller.hears(Object.keys(subjects), 'message', async (bot, message) => {

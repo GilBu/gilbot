@@ -11,10 +11,6 @@ module.exports = function(controller) {
         await bot.reply(message, 'I heard a sample message.');
     });
 
-    controller.hears('hi','message,direct_message', async(bot, message) => {
-        await bot.reply(message, 'Hi you.');
-    });
-
     controller.on('message,direct_message', async(bot, message) => {
         await bot.reply(message, `Echo: ${ message.text }`);
     });
