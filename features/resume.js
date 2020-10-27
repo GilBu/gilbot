@@ -8,12 +8,16 @@
 
 function payloadCreator (obj, label) {
   let subjects = []
-  // console.log("1===============================================")
-  // console.log(obj)
-  // console.log(label)
-  // console.log(typeof (obj))
-  if(typeof obj === "string"){
-    
+  if (Array.isArray(obj)) {
+    obj.forEach(function(ele) {
+      subjects.push(
+        {
+          title: ele[label],
+          payload: ele[label],
+        }
+        )
+    });
+  } else if(typeof obj === "string"){
       subjects.push(
         {
           title: obj,
@@ -71,13 +75,22 @@ module.exports = function(controller) {
 
       controller.hears(Object.keys(subjects), 'message', async (bot, message) => {
         subjects = subjects[`${message["text"]}`]
-        if ( subjects[0] != undefined && typeof subjects[0] != 'string' ) {
-          subjects = subjects[0]
-        }
-        await bot.reply(message,{
+        let name = ''
+        if (Array.isArray(subjects)) {
+          name = Object.keys(subjects[0])[0];
+          await bot.reply(message,{
             text: `Here are some quick replies for ${message['text']}`,
-            quick_replies: payloadCreator(subjects, `${message["text"]}`)
-        });
+            quick_replies: payloadCreator(subjects, `${name}`)
+          });
+        } else {
+          if ( subjects[0] != undefined && typeof subjects[0] != 'string' ) {
+            subjects = subjects[0]
+          }
+          await bot.reply(message,{
+              text: `Here are some quick replies for ${message['text']}`,
+              quick_replies: payloadCreator(subjects, `${message["text"]}`)
+          });
+        }
 
         controller.hears(Object.keys(subjects), 'message', async (bot, message) => {
           subjects = subjects[`${message["text"]}`]
