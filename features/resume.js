@@ -65,6 +65,18 @@ module.exports = function(controller) {
   if (controller.adapter.name === 'Web Adapter') {
     // console.log(typeof resume["basics"]["name"])
     console.log('Loading sample web features...');
+
+    let array = []
+    let hashIndex = {}
+    controller.hears(hashIndex, 'message', async (bot, message) => {
+      console.log('yaya ')
+      await bot.reply(message,{
+          text: 'Here are some quick replies',
+          quick_replies: subjects[hashIndex[`${message['text']}`]]
+      });
+
+    })
+
     let subjects = resume
     controller.hears("resume", 'message', async (bot, message) => {
       subjects = resume
@@ -82,6 +94,11 @@ module.exports = function(controller) {
             text: `Here are some quick replies for ${message['text']}`,
             quick_replies: payloadCreator(subjects, `${name}`)
           });
+          let idx = 0
+          name.forEach(function(ele) {
+            hashIndex[ele] = idx
+            idx += 1
+          });
         } else {
           if ( subjects[0] != undefined && typeof subjects[0] != 'string' ) {
             subjects = subjects[0]
@@ -94,7 +111,6 @@ module.exports = function(controller) {
 
         controller.hears(Object.keys(subjects), 'message', async (bot, message) => {
           subjects = subjects[`${message["text"]}`]
-          
           if ( (Array.isArray(subjects) && typeof subjects[0] != 'object') || typeof subjects  === 'string'){
             await bot.reply(message,{
               text: `${subjects}`
