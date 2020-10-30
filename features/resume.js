@@ -69,7 +69,7 @@ module.exports = function(controller) {
     let array = []
     let hashIndex = {}
     controller.hears(hashIndex, 'message', async (bot, message) => {
-      console.log('yaya ')
+      console.log('yayay')
       await bot.reply(message,{
           text: 'Here are some quick replies',
           quick_replies: subjects[hashIndex[`${message['text']}`]]
@@ -95,8 +95,8 @@ module.exports = function(controller) {
             quick_replies: payloadCreator(subjects, `${name}`)
           });
           let idx = 0
-          name.forEach(function(ele) {
-            hashIndex[ele] = idx
+          subjects.forEach(function(ele) {
+            hashIndex[ele['name']] = idx
             idx += 1
           });
         } else {
